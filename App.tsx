@@ -577,7 +577,7 @@ const App: React.FC = () => {
                     required
                     name="employeeName"
                     type="text" 
-                    placeholder="Nome Completo"
+                    placeholder="Seu Nome"
                     className="w-full pl-12 pr-6 py-5 rounded-2xl bg-gray-50 border-2 border-transparent focus:bg-white focus:border-nba-blue outline-none transition-all font-bold text-gray-800 text-lg shadow-inner"
                   />
                 </div>
