@@ -1,0 +1,7 @@
+{
+  "name": "NBAPARK Frota Control",
+  "description": "Uma aplicação moderna para controle de reservas e registros de quilometragem da frota NBAPARK, com integração inteligente para análise de itinerários.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
