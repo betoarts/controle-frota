@@ -3,6 +3,10 @@ import { Layout } from './components/Layout';
 import { Reservation, AppState } from './types';
 import { analyzeItinerary, generateWeeklySummary } from './services/geminiService';
 import { sendWebhook } from './services/webhookService';
+import { UserLogin } from './components/UserLogin';
+import { SchedulePage } from './components/SchedulePage';
+import { GlobalHistory } from './components/GlobalHistory';
+import { userService, User } from './services/userService';
 
 const VEHICLES = [
   { id: 'polo-vw', name: 'Polo Volkswagen', icon: 'fa-car-side' }
@@ -15,6 +19,7 @@ interface NotificationState {
 }
 
 const App: React.FC = () => {
+  const [user, setUser] = useState<User | null>(null);
   const [activeTab, setActiveTab] = useState<AppState>('dashboard');
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -32,22 +37,29 @@ const App: React.FC = () => {
   const [endKmValues, setEndKmValues] = useState<Record<string, string>>({});
   // Estado para controlar qual viagem está em processo de confirmação
   const [confirmingId, setConfirmingId] = useState<string | null>(null);
+  // Estado para viagens ativas GLOBAIS (de todos os usuários)
+  const [globalActiveTrips, setGlobalActiveTrips] = useState<Reservation[]>([]);
 
-  // Carregar dados iniciais do Cache (Reservas + Resumo IA)
+  // Gestão de Sessão do Usuário
   useEffect(() => {
-    // 1. Carregar Histórico de Viagens
-    const savedRes = localStorage.getItem('nbapark_reservations');
-    if (savedRes) {
-      try {
-        const parsed = JSON.parse(savedRes);
-        if (Array.isArray(parsed)) {
-          setReservations(parsed);
-        }
-      } catch (e) {
-        console.error("Erro ao carregar histórico", e);
-      }
+    const savedUser = localStorage.getItem('nbapark_user');
+    if (savedUser) {
+      setUser(JSON.parse(savedUser));
     }
+  }, []);
 
+  useEffect(() => {
+    if (user) {
+      localStorage.setItem('nbapark_user', JSON.stringify(user));
+      // Carregar reservas do Supabase se usuário estiver logado
+      userService.getUserReservations(user.id)
+        .then(setReservations)
+        .catch(err => console.error("Erro ao carregar reservas:", err));
+    }
+  }, [user]);
+
+  // Carregar dados iniciais do Cache (Apenas Resumo IA agora)
+  useEffect(() => {
     // 2. Carregar Última Análise da Frota
     const savedSummary = localStorage.getItem('nbapark_summary');
     if (savedSummary) {
@@ -55,10 +67,17 @@ const App: React.FC = () => {
     }
   }, []);
 
-  // Salvar Reservas no Cache sempre que mudar
+  // Sync manual ao mudar
   useEffect(() => {
-    localStorage.setItem('nbapark_reservations', JSON.stringify(reservations));
-  }, [reservations]);
+    if (activeTab === 'dashboard') {
+       // Atualiza status global do veículo
+       userService.getActiveReservations().then(setGlobalActiveTrips).catch(console.error);
+    }
+    
+    if (user) {
+       userService.getUserReservations(user.id).then(setReservations).catch(console.error);
+    }
+  }, [activeTab]);
 
   // Salvar Resumo da IA no Cache sempre que mudar
   useEffect(() => {
@@ -120,7 +139,7 @@ const App: React.FC = () => {
 
     const newRes: Reservation = {
       id: `res-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      employeeName: name,
+      employeeName: user?.name || name, // Prioriza usuário logado
       vehicle: vehicle,
       startOdometer: startOdo,
       itinerary: itin,
@@ -128,19 +147,30 @@ const App: React.FC = () => {
       status: 'active'
     };
 
-    // Dispara Webhook de Início
-    sendWebhook({
-      event: 'trip_start',
-      tripId: newRes.id,
-      motorista: name,
-      vehicle: vehicle,
-      km_inicial: startOdo,
-      itinerary: itin
-    });
+    try {
+      if (user) {
+        await userService.createReservation(newRes, user.id);
+      }
+      
+      // Dispara Webhook de Início
+      sendWebhook({
+        event: 'trip_start',
+        tripId: newRes.id,
+        motorista: newRes.employeeName,
+        vehicle: vehicle,
+        km_inicial: startOdo,
+        itinerary: itin
+      });
 
-    setReservations(prev => [newRes, ...prev]);
-    setIsSubmitting(false);
-    setActiveTab('dashboard');
+      setReservations(prev => [newRes, ...prev]);
+      setIsSubmitting(false);
+      setActiveTab('dashboard');
+    } catch (error) {
+       console.error("Erro ao criar reserva:", error);
+       alert("Erro ao salvar registro no banco de dados.");
+       setIsSubmitting(false);
+       return;
+    }
     
     // Tenta analisar com contexto rico (sem geolocalização do dispositivo)
     analyzeItinerary({
@@ -196,31 +226,43 @@ const App: React.FC = () => {
     const endKm = Number(endKmValues[id]);
     const trip = reservations.find(r => r.id === id);
     
-    // Dispara Webhook de Encerramento
-    if (trip) {
-       sendWebhook({
-         event: 'trip_end',
-         tripId: trip.id,
-         motorista: trip.employeeName,
-         vehicle: trip.vehicle,
-         km_inicial: trip.startOdometer,
-         km_final: endKm,
-         km_total: endKm - trip.startOdometer,
-         duracao_minutos: Math.round((new Date().getTime() - new Date(trip.startTime).getTime()) / 60000)
-       });
-    }
-    
-    setReservations(prev => prev.map(res => {
-      if (res.id === id) {
-        return {
-          ...res,
-          endOdometer: endKm,
-          endTime: new Date().toISOString(),
-          status: 'completed'
-        };
-      }
-      return res;
-    }));
+    const updatedTrip = {
+       ...trip,
+       endOdometer: endKm,
+       endTime: new Date().toISOString(),
+       status: 'completed' as const
+    };
+
+    // Atualizar no Supabase
+    userService.updateReservation(updatedTrip as Reservation)
+      .then(() => {
+         // Dispara Webhook de Encerramento (apenas se salvou ok)
+         if (trip) {
+            sendWebhook({
+              event: 'trip_end',
+              tripId: trip.id,
+              motorista: trip.employeeName,
+              vehicle: trip.vehicle,
+              km_inicial: trip.startOdometer,
+              km_final: endKm,
+              km_total: endKm - trip.startOdometer,
+              duracao_minutos: Math.round((new Date().getTime() - new Date(trip.startTime).getTime()) / 60000)
+            });
+         }
+         
+         setReservations(prev => prev.map(res => {
+          if (res.id === id) {
+            return updatedTrip as Reservation;
+          }
+          return res;
+        }));
+        
+        triggerSuccessAnimation();
+      })
+      .catch(err => {
+        console.error("Erro ao finalizar viagem:", err);
+        alert("Erro ao salvar finalização. Tente novamente.");
+      });
 
     setConfirmingId(null);
     setEndKmValues(prev => {
@@ -229,7 +271,17 @@ const App: React.FC = () => {
       return next;
     });
 
-    triggerSuccessAnimation();
+    // Removido triggerSuccessAnimation daqui para executar somente no sucesso da promise
+
+    setConfirmingId(null);
+    setEndKmValues(prev => {
+      const next = { ...prev };
+      delete next[id];
+      return next;
+    });
+
+    // triggerSuccessAnimation agora chamado no then
+    // triggerSuccessAnimation();
   };
 
   const triggerSuccessAnimation = () => {
@@ -275,6 +327,10 @@ const App: React.FC = () => {
 
   const activeTrips = reservations.filter(r => r.status === 'active');
   const completedTrips = reservations.filter(r => r.status === 'completed');
+
+  if (!user) {
+    return <UserLogin onLogin={setUser} />;
+  }
 
   return (
     <Layout activeTab={activeTab} setActiveTab={setActiveTab}>
@@ -411,24 +467,62 @@ const App: React.FC = () => {
             </button>
           </div>
 
-          {/* Veículos Ativos */}
+          {/* Veículos Ativos / Status Card */}
           <div className="space-y-4">
-            <div className="flex items-center justify-between px-2">
+            
+            {/* NOVO: Card de Status Global do Veículo */}
+            {globalActiveTrips.length > 0 ? (
+               <div className="bg-red-50 border-l-8 border-nba-red p-6 rounded-3xl shadow-lg relative overflow-hidden animate-pulse">
+                  <div className="flex justify-between items-start relative z-10">
+                     <div>
+                        <h2 className="text-2xl font-black text-nba-red uppercase italic tracking-tighter mb-1">OCUPADO</h2>
+                        <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-4">Veículo em uso no momento</p>
+                        
+                        <div className="flex items-center gap-3 bg-white/50 p-2 rounded-xl backdrop-blur-sm">
+                           <div className="w-10 h-10 bg-nba-red text-white rounded-full flex items-center justify-center font-black text-lg">
+                              {globalActiveTrips[0].employeeName.charAt(0)}
+                           </div>
+                           <div>
+                              <p className="text-[10px] font-black text-gray-400 uppercase">Motorista Atual</p>
+                              <p className="text-sm font-black text-gray-800 uppercase leading-none">{globalActiveTrips[0].employeeName}</p>
+                           </div>
+                        </div>
+                     </div>
+                     <div className="bg-white p-3 rounded-2xl shadow-sm text-center min-w-[80px]">
+                        <p className="text-[9px] font-black text-gray-400 uppercase mb-1">Saída</p>
+                        <p className="text-lg font-black text-nba-red">
+                           {new Date(globalActiveTrips[0].startTime).toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'})}
+                        </p>
+                     </div>
+                  </div>
+               </div>
+            ) : (
+               <div className="bg-green-50 border-l-8 border-green-500 p-6 rounded-3xl shadow-lg relative overflow-hidden">
+                  <div className="flex justify-between items-center relative z-10">
+                     <div>
+                        <h2 className="text-2xl font-black text-green-600 uppercase italic tracking-tighter mb-1">D I S P O N Í V E L</h2>
+                        <p className="text-xs font-bold text-gray-500 uppercase tracking-widest">Veículo livre para uso</p>
+                     </div>
+                     <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-sm">
+                        <i className="fas fa-key text-2xl text-green-500"></i>
+                     </div>
+                  </div>
+               </div>
+            )}
+
+            <div className="flex items-center justify-between px-2 mt-8">
               <h2 className="text-lg font-black text-gray-800 flex items-center uppercase italic">
                 <i className="fas fa-satellite-dish text-nba-blue mr-2 text-xs"></i>
-                Monitoramento em Tempo Real
+                Suas Atividades
               </h2>
               <span className="bg-nba-blue/10 text-nba-blue text-[10px] px-3 py-1 rounded-full font-black uppercase tracking-widest border border-nba-blue/20">
-                {activeTrips.length} Veículos Ativos
+                {activeTrips.length} Ativas
               </span>
             </div>
             
             {activeTrips.length === 0 ? (
-              <div className="bg-white p-12 rounded-3xl border-2 border-dashed border-gray-200 flex flex-col items-center justify-center text-center opacity-60">
-                <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mb-4">
-                   <i className="fas fa-parking text-3xl text-gray-300"></i>
-                </div>
-                <p className="font-bold text-gray-400 uppercase text-xs tracking-[0.2em]">Todos os veículos no pátio</p>
+              <div className="bg-white p-8 rounded-3xl border-2 border-dashed border-gray-200 flex flex-col items-center justify-center text-center opacity-60">
+                <p className="font-bold text-gray-400 uppercase text-xs tracking-[0.2em]">Você não está utilizando nenhum veículo agora</p>
               </div>
             ) : (
               <div className="grid grid-cols-1 gap-4">
@@ -573,12 +667,13 @@ const App: React.FC = () => {
                   <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
                     <i className="fas fa-user-tie text-gray-300 group-focus-within:text-nba-blue transition-colors"></i>
                   </div>
-                  <input 
+                    <input 
                     required
                     name="employeeName"
                     type="text" 
-                    placeholder="Seu Nome"
-                    className="w-full pl-12 pr-6 py-5 rounded-2xl bg-gray-50 border-2 border-transparent focus:bg-white focus:border-nba-blue outline-none transition-all font-bold text-gray-800 text-lg shadow-inner"
+                    defaultValue={user?.name}
+                    readOnly
+                    className="w-full pl-12 pr-6 py-5 rounded-2xl bg-gray-100 border-2 border-transparent focus:bg-white focus:border-nba-blue outline-none transition-all font-bold text-gray-800 text-lg shadow-inner cursor-not-allowed opacity-75"
                   />
                 </div>
               </div>
@@ -793,10 +888,10 @@ const App: React.FC = () => {
               </button>
               <button 
                 onClick={() => {
-                  if(confirm('Atenção: Todos os dados serão perdidos. Limpar histórico?')) {
+                  if(confirm('Deseja sair da sua conta?')) {
+                    setUser(null);
                     setReservations([]);
-                    setDashboardSummary('');
-                    localStorage.removeItem('nbapark_reservations');
+                    localStorage.removeItem('nbapark_user');
                     localStorage.removeItem('nbapark_summary');
                   }
                 }}
@@ -869,6 +964,14 @@ const App: React.FC = () => {
             </div>
           )}
         </div>
+      )}
+
+      {activeTab === 'scheduling' && (
+        <SchedulePage user={user} />
+      )}
+
+      {activeTab === 'global-history' && (
+        <GlobalHistory />
       )}
     </Layout>
   );

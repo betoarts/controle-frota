@@ -17,4 +17,4 @@ export interface NewReservation {
   itinerary: string;
 }
 
-export type AppState = 'dashboard' | 'new-reservation' | 'history';
+export type AppState = 'dashboard' | 'new-reservation' | 'history' | 'scheduling' | 'global-history';
