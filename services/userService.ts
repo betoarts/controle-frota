@@ -38,7 +38,34 @@ export const userService = {
       throw createError;
     }
 
-    return newUser;
+    const userResult = existingUser || newUser;
+    
+    // Log the login action
+    if (userResult) {
+       await this.logUsage(userResult.id, 'LOGIN', { 
+         method: existingUser ? 'EXISTING_USER' : 'NEW_REGISTER',
+         timestamp: new Date().toISOString()
+       });
+    }
+
+    return userResult;
+  },
+
+  async logUsage(userId: string, action: string, details?: any) {
+    const { error } = await supabase
+      .from('user_logs')
+      .insert([
+        { 
+          user_id: userId, 
+          action, 
+          details 
+        }
+      ]);
+
+    if (error) {
+      console.error('Error logging usage:', error);
+      // Don't throw error to avoid blocking the main flow
+    }
   },
 
   async getUserReservations(userId: string): Promise<Reservation[]> {
@@ -133,9 +160,16 @@ export const userService = {
       console.error('Error creating reservation:', error);
       throw error;
     }
+
+    // Log the action
+    await this.logUsage(userId, 'CREATE_RESERVATION', {
+      reservationId: reservation.id,
+      vehicle: reservation.vehicle,
+      startTime: reservation.startTime
+    });
   },
 
-  async updateReservation(reservation: Reservation): Promise<void> {
+  async updateReservation(reservation: Reservation, userId: string): Promise<void> {
     const { error } = await supabase
       .from('reservations')
       .update({
@@ -149,5 +183,14 @@ export const userService = {
       console.error('Error updating reservation:', error);
       throw error;
     }
+
+    // Log the action
+    await this.logUsage(userId, 'UPDATE_RESERVATION', {
+      reservationId: reservation.id,
+      endOdometer: reservation.endOdometer,
+      endTime: reservation.endTime,
+      status: reservation.status
+    });
   }
 };
+

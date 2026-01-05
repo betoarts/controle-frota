@@ -234,7 +234,8 @@ const App: React.FC = () => {
     };
 
     // Atualizar no Supabase
-    userService.updateReservation(updatedTrip as Reservation)
+    const userId = user?.id || 'unknown';
+    userService.updateReservation(updatedTrip as Reservation, userId)
       .then(() => {
          // Dispara Webhook de Encerramento (apenas se salvou ok)
          if (trip) {
