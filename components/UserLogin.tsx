@@ -85,7 +85,7 @@ export const UserLogin: React.FC<UserLoginProps> = ({ onLogin }) => {
                         type="tel" 
                         value={phone}
                         onChange={(e) => setPhone(e.target.value)}
-                        placeholder="Ex: 11999999999"
+                        placeholder="Ex: 54999999999"
                         className="w-full pl-10 pr-4 py-4 rounded-xl bg-gray-50 border-2 border-transparent focus:bg-white focus:border-nba-blue outline-none transition-all font-bold text-gray-800 placeholder-gray-300"
                         required
                     />
@@ -95,7 +95,7 @@ export const UserLogin: React.FC<UserLoginProps> = ({ onLogin }) => {
             <button 
                 type="submit" 
                 disabled={isLoading}
-                className="w-full bg-nba-blue hover:bg-blue-800 text-white font-black py-4 rounded-xl shadow-lg transition-all active:scale-[0.98] uppercase tracking-wider flex items-center justify-center gap-2"
+                className="w-full nba-blue hover:bg-blue-800 text-white font-black py-4 rounded-xl shadow-lg transition-all active:scale-[0.98] uppercase tracking-wider flex items-center justify-center gap-2"
             >
                 {isLoading ? (
                     <i className="fas fa-circle-notch animate-spin"></i>
