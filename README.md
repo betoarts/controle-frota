@@ -1,20 +1,104 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# NBAPARK Fleet Control 🚗📊
 
-# Run and deploy your AI Studio app
+Aplicação de controle de frota desenvolvida para a NBAPARK, permitindo o gerenciamento eficiente do uso de veículos, quilometragem e itinerários. O sistema inclui recursos de análise inteligente com IA, histórico de viagens e suporte a PWA.
 
-This contains everything you need to run your app locally.
+## 📋 Funcionalidades Principais
 
-View your app in AI Studio: https://ai.studio/apps/drive/1ylCphTnNIBDDy1mRLD_cQPz6o3BXW3d-
+- **Dashboard Inteligente via IA**: Resumos semanais e análises de frota gerados automaticamente pelo Google Gemini, oferecendo insights sobre o uso dos veículos.
+- **Controle de Saídas e Chegadas**:
+  - Registro rápido de novas viagens com seleção de veículo, odômetro inicial e itinerário.
+  - Encerramento de viagens com validação de quilometragem e cálculo automático de distância/duração.
+- **Monitoramento em Tempo Real**: Visualização de viagens ativas globais (quem está usando qual veículo no momento).
+- **Histórico Completo**:
+  - Histórico individual de viagens do usuário.
+  - **Importação e Exportação CSV**: Facilidade para backup e relatórios externos.
+- **Agendamento**: Funcionalidade para reservar veículos antecipadamente (SchedulePage).
+- **Autenticação**: Sistema de login integrado com persistência de sessão.
+- **Integração Webhook**: Notificações automáticas de início e fim de viagens para sistemas externos.
+- **PWA (Progressive Web App)**: Pode ser instalado como aplicativo nativo em dispositivos móveis e desktop.
 
-## Run Locally
+## 🚀 Tecnologias Utilizadas
 
-**Prerequisites:**  Node.js
+- **Frontend**: React 19, TypeScript, Vite
+- **Estilização**: Tailwind CSS (Design personalizado NBAPARK)
+- **Backend / BaaS**: Supabase (Banco de Dados, Autenticação)
+- **Inteligência Artificial**: Google Gemini AI (@google/genai)
+- **Ícones**: FontAwesome
+- **Build/Tooling**: Vite Plugin PWA
 
+## 📂 Estrutura do Projeto
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+```
+nbapark-frota/
+├── src/
+│   ├── components/      # Componentes de UI (Layout, Login, Forms)
+│   ├── lib/             # Configurações de bibliotecas (Supabase)
+│   ├── services/        # Lógica de negócios (UserService, GeminiService, Webhook)
+│   ├── App.tsx          # Componente principal e roteamento
+│   └── types.ts         # Definições de tipos TypeScript
+├── public/              # Assets estáticos
+└── ...config files      # Configurações (Vite, Tailwind, TypeScript)
+```
+
+## 🛠️ Instalação e Configuração
+
+### Pré-requisitos
+
+- Node.js (v18 ou superior)
+- Gerenciador de pacotes (npm, yarn ou pnpm)
+
+### Passo a Passo
+
+1.  **Clone o repositório**
+
+    ```bash
+    git clone https://github.com/betoarts/controle-frota.git
+    cd nbapark-frota
+    ```
+
+2.  **Instale as dependências**
+
+    ```bash
+    npm install
+    ```
+
+3.  **Configuração de Variáveis de Ambiente**
+    Crie um arquivo `.env.local` na raiz do projeto com as chaves necessárias (baseado no `.env.example` se existir, ou solicite ao administrador):
+
+    ```env
+    VITE_SUPABASE_URL=sua_url_supabase
+    VITE_SUPABASE_ANON_KEY=sua_chave_anonima
+    VITE_GEMINI_API_KEY=sua_chave_gemini
+    # Outras variaveis conforme necessario
+    ```
+
+4.  **Rodar Localmente**
+    ```bash
+    npm run dev
+    ```
+    O aplicativo estará disponível (geralmente) em `http://localhost:5173`.
+
+## 📦 Build para Produção
+
+Para gerar a versão otimizada para produção:
+
+```bash
+npm run build
+```
+
+Para visualizar o build localmente:
+
+```bash
+npm run preview
+```
+
+## 📱 Suporte PWA
+
+Este projeto está configurado como um PWA. Para garantir o funcionamento correto offline e a instalação:
+
+1.  Certifique-se de que o aplicativo está sendo servido via **HTTPS** em produção.
+2.  O manifesto (`manifest.webmanifest`) e o Service Worker são gerados automaticamente durante o build.
+
+---
+
+Desenvolvido para **NBAPARK** 🏀

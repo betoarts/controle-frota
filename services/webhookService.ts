@@ -33,7 +33,7 @@ const getSaoPauloISOString = () => {
 };
 
 export const sendWebhook = async (data: any) => {
-  const WEBHOOK_URL = "https://n8n.vendaszapp.com/webhook/frota";
+  const WEBHOOK_URL = "https://auto.servicestec.pro/webhook/frota";
   
   try {
     // Fire and forget - não bloqueia a execução do app se falhar
