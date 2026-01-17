@@ -41,6 +41,8 @@ const App: React.FC = () => {
   const [confirmingId, setConfirmingId] = useState<string | null>(null);
   // Estado para viagens ativas GLOBAIS (de todos os usuários)
   const [globalActiveTrips, setGlobalActiveTrips] = useState<Reservation[]>([]);
+  // Estado para verificar se o veículo está bloqueado
+  const [vehicleBlocked, setVehicleBlocked] = useState<string | null>(null);
 
   // Gestão de Sessão do Usuário
   useEffect(() => {
@@ -86,6 +88,17 @@ const App: React.FC = () => {
     if (activeTab === 'dashboard') {
        // Atualiza status global do veículo
        userService.getActiveReservations().then(setGlobalActiveTrips).catch(console.error);
+       
+       // Verificar se o veículo principal está bloqueado
+       const checkVehicleBlock = async () => {
+         try {
+           const vehicleStatus = await adminService.isVehicleBlocked('Polo Volkswagen');
+           setVehicleBlocked(vehicleStatus.blocked ? vehicleStatus.reason : null);
+         } catch (e) {
+           console.debug('Could not check vehicle block status');
+         }
+       };
+       checkVehicleBlock();
     }
     
     if (user) {
@@ -508,7 +521,33 @@ const App: React.FC = () => {
           <div className="space-y-4">
             
             {/* NOVO: Card de Status Global do Veículo */}
-            {globalActiveTrips.length > 0 ? (
+            {vehicleBlocked ? (
+               /* Card de Veículo BLOQUEADO - prioridade máxima */
+               <div className="bg-orange-50 border-l-8 border-orange-500 p-6 rounded-3xl shadow-lg relative overflow-hidden">
+                  <div className="absolute -right-8 -top-8 w-32 h-32 bg-orange-200 rounded-full filter blur-3xl opacity-40"></div>
+                  <div className="flex justify-between items-start relative z-10">
+                     <div>
+                        <div className="flex items-center gap-2 mb-2">
+                           <i className="fas fa-ban text-orange-500 text-2xl animate-pulse"></i>
+                           <h2 className="text-2xl font-black text-orange-600 uppercase italic tracking-tighter">BLOQUEADO</h2>
+                        </div>
+                        <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">Veículo indisponível para uso</p>
+                        
+                        <div className="bg-white/70 p-3 rounded-xl backdrop-blur-sm border border-orange-200">
+                           <p className="text-[10px] font-black text-gray-400 uppercase mb-1">Motivo do Bloqueio</p>
+                           <p className="text-sm font-black text-orange-600">{vehicleBlocked}</p>
+                        </div>
+                     </div>
+                     <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-sm border-2 border-orange-200">
+                        <i className="fas fa-lock text-2xl text-orange-500"></i>
+                     </div>
+                  </div>
+                  <p className="text-xs text-gray-500 mt-4 italic">
+                     <i className="fas fa-info-circle mr-1"></i>
+                     Contate o administrador para mais informações.
+                  </p>
+               </div>
+            ) : globalActiveTrips.length > 0 ? (
                <div className="bg-red-50 border-l-8 border-nba-red p-6 rounded-3xl shadow-lg relative overflow-hidden animate-pulse">
                   <div className="flex justify-between items-start relative z-10">
                      <div>
