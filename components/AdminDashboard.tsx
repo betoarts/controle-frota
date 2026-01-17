@@ -596,8 +596,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
                     onChange={(e) => setFilters({ ...filters, vehicle: e.target.value || undefined })}
                     className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white font-bold focus:border-blue-500 outline-none transition-all"
                   >
-                    <option value="">Todos</option>
-                    <option value="Polo Volkswagen">Polo Volkswagen</option>
+                    <option value="" className="bg-gray-800 text-white">Todos</option>
+                    <option value="Polo Volkswagen" className="bg-gray-800 text-white">Polo Volkswagen</option>
                   </select>
                 </div>
                 <div>
@@ -607,9 +607,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
                     onChange={(e) => setFilters({ ...filters, status: e.target.value as any || undefined })}
                     className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white font-bold focus:border-blue-500 outline-none transition-all"
                   >
-                    <option value="">Todos</option>
-                    <option value="completed">Finalizadas</option>
-                    <option value="active">Ativas</option>
+                    <option value="" className="bg-gray-800 text-white">Todos</option>
+                    <option value="completed" className="bg-gray-800 text-white">Finalizadas</option>
+                    <option value="active" className="bg-gray-800 text-white">Ativas</option>
                   </select>
                 </div>
                 <div className="flex items-end">
@@ -704,13 +704,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
                 onChange={(e) => setBlockReason(e.target.value)}
                 className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white font-bold focus:border-red-500 outline-none transition-all mb-3"
               >
-                <option value="">Selecione um motivo...</option>
-                <option value="Manutenção preventiva">Manutenção preventiva</option>
-                <option value="Manutenção corretiva">Manutenção corretiva</option>
-                <option value="Abastecimento">Abastecimento</option>
-                <option value="Reservado para evento">Reservado para evento</option>
-                <option value="Documentação pendente">Documentação pendente</option>
-                <option value="Outro">Outro</option>
+                <option value="" className="bg-gray-800 text-white">Selecione um motivo...</option>
+                <option value="Manutenção preventiva" className="bg-gray-800 text-white">Manutenção preventiva</option>
+                <option value="Manutenção corretiva" className="bg-gray-800 text-white">Manutenção corretiva</option>
+                <option value="Abastecimento" className="bg-gray-800 text-white">Abastecimento</option>
+                <option value="Reservado para evento" className="bg-gray-800 text-white">Reservado para evento</option>
+                <option value="Documentação pendente" className="bg-gray-800 text-white">Documentação pendente</option>
+                <option value="Sinistro/Acidente" className="bg-gray-800 text-white">Sinistro/Acidente</option>
+                <option value="Outro" className="bg-gray-800 text-white">Outro</option>
               </select>
               {blockReason === 'Outro' && (
                 <input
