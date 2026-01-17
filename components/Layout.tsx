@@ -65,13 +65,6 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
             <i className="fas fa-calendar-alt text-xl"></i>
             <span className="text-[10px] font-bold mt-1">Agenda</span>
           </button>
-          <button 
-            onClick={() => setActiveTab('global-history')}
-            className={`flex flex-col items-center ${activeTab === 'global-history' ? 'text-nba-blue' : 'text-gray-400'}`}
-          >
-            <i className="fas fa-globe-americas text-xl"></i>
-            <span className="text-[10px] font-bold mt-1">Geral</span>
-          </button>
         </nav>
       
       </div>

@@ -6,7 +6,9 @@ import { sendWebhook } from './services/webhookService';
 import { UserLogin } from './components/UserLogin';
 import { SchedulePage } from './components/SchedulePage';
 import { GlobalHistory } from './components/GlobalHistory';
+import { AdminDashboard } from './components/AdminDashboard';
 import { userService, User } from './services/userService';
+import { adminService } from './services/adminService';
 
 const VEHICLES = [
   { id: 'polo-vw', name: 'Polo Volkswagen', icon: 'fa-car-side' }
@@ -46,6 +48,18 @@ const App: React.FC = () => {
     if (savedUser) {
       setUser(JSON.parse(savedUser));
     }
+  }, []);
+
+  // Atalho de teclado secreto para Admin Dashboard (Ctrl+Shift+A)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.ctrlKey && e.shiftKey && e.key === 'A') {
+        e.preventDefault();
+        setActiveTab('admin-dashboard');
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
   useEffect(() => {
@@ -136,6 +150,23 @@ const App: React.FC = () => {
     const name = formData.get('employeeName') as string;
     const itin = formData.get('itinerary') as string;
     const vehicle = formData.get('vehicle') as string;
+
+    // Check if vehicle is blocked
+    try {
+      const vehicleStatus = await adminService.isVehicleBlocked(vehicle);
+      if (vehicleStatus.blocked) {
+        setNotification({
+          show: true,
+          type: 'error',
+          message: `Veículo bloqueado: ${vehicleStatus.reason || 'Indisponível no momento'}`
+        });
+        setIsSubmitting(false);
+        return;
+      }
+    } catch (error) {
+      console.error('Error checking vehicle status:', error);
+      // Continue anyway if check fails
+    }
 
     const newRes: Reservation = {
       id: `res-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
@@ -331,6 +362,11 @@ const App: React.FC = () => {
 
   if (!user) {
     return <UserLogin onLogin={setUser} />;
+  }
+
+  // Admin Dashboard - renders outside of Layout for full screen
+  if (activeTab === 'admin-dashboard') {
+    return <AdminDashboard onExit={() => setActiveTab('dashboard')} />;
   }
 
   return (
