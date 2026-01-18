@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Layout } from './components/Layout';
 import { Reservation, AppState } from './types';
-import { analyzeItinerary, generateWeeklySummary } from './services/geminiService';
+import { analyzeItinerary, generateWeeklySummary } from './services/tipsService';
 import { sendWebhook } from './services/webhookService';
 import { UserLogin } from './components/UserLogin';
 import { SchedulePage } from './components/SchedulePage';

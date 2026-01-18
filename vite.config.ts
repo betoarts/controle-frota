@@ -4,7 +4,8 @@ import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig(({ mode }) => {
-    const env = loadEnv(mode, '.', '');
+    const env = loadEnv(mode, process.cwd(), '');
+    console.log('Building with GEMINI_API_KEY:', env.GEMINI_API_KEY ? 'Found' : 'NOT FOUND');
     return {
       server: {
         port: 3000,
