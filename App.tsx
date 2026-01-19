@@ -7,6 +7,7 @@ import { UserLogin } from './components/UserLogin';
 import { SchedulePage } from './components/SchedulePage';
 import { GlobalHistory } from './components/GlobalHistory';
 import { AdminDashboard } from './components/AdminDashboard';
+import { TodoList } from './components/TodoList';
 import { userService, User } from './services/userService';
 import { adminService } from './services/adminService';
 
@@ -1098,6 +1099,10 @@ const App: React.FC = () => {
             </div>
           </div>
         </div>
+      )}
+
+      {activeTab === 'todo' && (
+        <TodoList />
       )}
     </Layout>
   );

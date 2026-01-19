@@ -17,4 +17,15 @@ export interface NewReservation {
   itinerary: string;
 }
 
-export type AppState = 'dashboard' | 'new-reservation' | 'history' | 'scheduling' | 'global-history' | 'admin-dashboard' | 'about';
+export type AppState = 'dashboard' | 'new-reservation' | 'history' | 'scheduling' | 'global-history' | 'admin-dashboard' | 'about' | 'todo';
+
+export interface TodoTask {
+  id: string;
+  title: string;
+  description?: string;
+  dueDate?: string;
+  dueTime?: string;
+  priority: 'baixa' | 'media' | 'alta';
+  status: 'pendente' | 'em_progresso' | 'concluida';
+  createdAt: string;
+}

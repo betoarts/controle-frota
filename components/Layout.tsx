@@ -50,6 +50,13 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
             <span className="text-[10px] font-bold mt-1">Início</span>
           </button>
           <button 
+            onClick={() => setActiveTab('todo')}
+            className={`flex flex-col items-center ${activeTab === 'todo' ? 'text-nba-blue' : 'text-gray-400'}`}
+          >
+            <i className="fas fa-tasks text-xl"></i>
+            <span className="text-[10px] font-bold mt-1">Tarefas</span>
+          </button>
+          <button 
             onClick={() => setActiveTab('new-reservation')}
             className="relative -top-6 nba-red w-14 h-14 rounded-full flex items-center justify-center text-white shadow-xl border-4 border-gray-50 active:scale-95 transition-transform"
           >
