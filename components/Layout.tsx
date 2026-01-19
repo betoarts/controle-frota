@@ -19,15 +19,19 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
         <header className="nba-blue text-white shadow-lg sticky top-0 z-50 md:rounded-t-[3rem]">
           <div className="px-6 py-5 flex justify-between items-center">
             <div className="flex items-center space-x-3">
-              <div className="bg-white rounded-full p-2">
-                 <i className="fas fa-basketball-ball text-nba-red text-2xl animate-bounce-slow"></i>
-              </div>
+              <img src="/logo.png" alt="NBAPARK Logo" className="h-12 w-auto" />
               <div>
-                <h1 className="text-xl font-extrabold tracking-tighter">NBAPARK</h1>
-                <p className="text-xs opacity-80 uppercase font-semibold">Logística & Frota</p>
+                <h1 className="text-xl font-extrabold tracking-tighter"></h1>
+                <p className="text-xs opacity-80 uppercase font-semibold"></p>
               </div>
             </div>
-            {/* Desktop-like nav moved inside the mobile frame if needed, or hidden if using bottom nav only */}
+            <button 
+              onClick={() => setActiveTab('about')}
+              className={`flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-bold transition-all ${activeTab === 'about' ? 'bg-white text-nba-blue' : 'bg-white/10 text-white hover:bg-white/20'}`}
+            >
+              <i className="fas fa-info-circle"></i>
+              <span className="hidden sm:inline">Sobre</span>
+            </button>
           </div>
         </header>
 

@@ -1049,6 +1049,56 @@ const App: React.FC = () => {
       {activeTab === 'global-history' && (
         <GlobalHistory />
       )}
+
+      {activeTab === 'about' && (
+        <div className="animate-fadeIn space-y-6">
+          <div className="flex items-center mb-6">
+            <button onClick={() => setActiveTab('dashboard')} className="mr-4 w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-nba-blue shadow-sm border border-gray-100 hover:shadow-md transition-all">
+              <i className="fas fa-chevron-left"></i>
+            </button>
+            <h2 className="text-2xl font-black text-gray-800 uppercase italic tracking-tighter">Sobre</h2>
+          </div>
+
+          <div className="p-8 rounded-3xl shadow-xl relative overflow-hidden" style={{ backgroundColor: '#7cc6de' }}>
+            <div className="absolute -right-10 -top-10 w-40 h-40 bg-blue-50 rounded-full filter blur-3xl opacity-50"></div>
+            
+            <div className="relative z-10 text-center">
+              <img src="/logo.png" alt="NBAPARK Logo" className="h-24 w-auto mx-auto mb-6" />
+              
+              <h3 className="text-2xl font-black text-nba-blue uppercase tracking-tight mb-2"></h3>
+              <p className="text-sm font-bold text-gray-600 uppercase tracking-widest mb-8">Controle de Frota</p>
+              
+              <div className="justify-left text-justify">
+                <div  className="bg-gray-50 p-6 rounded-2xl border-l-4 border-nba-blue mb-6">
+                  <p className="text-gray-700 font-medium leading-relaxed">
+                    Esta aplicação é <strong className="text-nba-blue">propriedade exclusiva da NBAPARK</strong>. 
+                    Desenvolvida para otimizar o gerenciamento e controle da frota de veículos, 
+                    proporcionando maior eficiência operacional e rastreabilidade completa das viagens.
+                  </p>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <div className="flex items-center justify-center gap-3">
+                  <div className="w-10 h-10 bg-nba-blue rounded-full flex items-center justify-center">
+                    <i className="fa-solid fa-user-secret text-gray-500 text-xl"></i>
+                  </div>
+                  <div className="text-left">
+                    <p className="text-[10px] font-black text-gray-600 uppercase tracking-widest">Desenvolvido por</p>
+                    <p className="text-[13px] font-black text-gray-500">TI NBAPARK</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-8 pt-6 border-t border-gray-100">
+                <p className="text-[10px] font-bold text-gray-600 uppercase tracking-widest">
+                  &copy; {new Date().getFullYear()} NBAPARK. Todos os direitos reservados.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </Layout>
   );
 };
