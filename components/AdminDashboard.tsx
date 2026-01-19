@@ -185,12 +185,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
       <header className="bg-black/30 backdrop-blur-xl border-b border-white/10 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
           <div className="flex items-center gap-4">
-            <div className="bg-gradient-to-br from-red-500 to-red-700 p-3 rounded-2xl shadow-lg">
-              <i className="fas fa-basketball-ball text-white text-2xl"></i>
-            </div>
+            <img src="/logo.png" alt="NBAPARK Logo" className="h-14 w-auto drop-shadow-lg" />
             <div>
-              <h1 className="text-2xl font-black uppercase tracking-tighter">NBAPARK</h1>
-              <p className="text-xs font-bold text-red-400 uppercase tracking-[0.3em]">Admin Dashboard</p>
+              <h1 className="text-1 font-black uppercase tracking-tighter">Admin Dashboard</h1>
+              <p className="text-xs font-bold text-red-400 uppercase tracking-[0.3em]"></p>
             </div>
           </div>
           
