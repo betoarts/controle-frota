@@ -21,10 +21,20 @@ interface NotificationState {
   type: 'success' | 'error' | 'warning';
 }
 
+import { SplashScreen } from './components/SplashScreen';
+
+// ... (imports existentes)
+
 const App: React.FC = () => {
+  const [showSplash, setShowSplash] = useState(true);
   const [user, setUser] = useState<User | null>(null);
   const [activeTab, setActiveTab] = useState<AppState>('dashboard');
   const [reservations, setReservations] = useState<Reservation[]>([]);
+  
+  // ... (outros estados)
+
+  // Mobile warning ...
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   
@@ -373,6 +383,10 @@ const App: React.FC = () => {
 
   const activeTrips = reservations.filter(r => r.status === 'active');
   const completedTrips = reservations.filter(r => r.status === 'completed');
+
+  if (showSplash) {
+    return <SplashScreen onFinish={() => setShowSplash(false)} />;
+  }
 
   if (!user) {
     return <UserLogin onLogin={setUser} />;
