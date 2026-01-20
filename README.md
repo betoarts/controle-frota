@@ -9,10 +9,16 @@ Aplicação de controle de frota desenvolvida para a NBAPARK, permitindo o geren
   - Registro rápido de novas viagens com seleção de veículo, odômetro inicial e itinerário.
   - Encerramento de viagens com validação de quilometragem e cálculo automático de distância/duração.
 - **Monitoramento em Tempo Real**: Visualização de viagens ativas globais (quem está usando qual veículo no momento).
+- **To-Do List Integrado** ✅:
+  - Gerenciamento completo de tarefas com persistência local.
+  - Filtros por status, prioridades visuais e dashboard de estatísticas.
+  - Calendário integrado para visualização de prazos.
+- **Splash Screen Dinâmica** 🎬: Tela de abertura com suporte a vídeo/GIF para uma experiência de usuário imersiva.
 - **Histórico Completo**:
   - Histórico individual de viagens do usuário.
   - **Importação e Exportação CSV**: Facilidade para backup e relatórios externos.
 - **Agendamento**: Funcionalidade para reservar veículos antecipadamente (SchedulePage).
+- **Interface Premium**: Design moderno com animações suaves, logo integrada e navegação intuitiva.
 - **Autenticação**: Sistema de login integrado com persistência de sessão.
 - **Integração Webhook**: Notificações automáticas de início e fim de viagens para sistemas externos.
 - **PWA (Progressive Web App)**: Pode ser instalado como aplicativo nativo em dispositivos móveis e desktop.
